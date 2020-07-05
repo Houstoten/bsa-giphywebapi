@@ -2,17 +2,18 @@ package com.bsa.giphyWebAPI.Entity;
 
 import lombok.*;
 
-import java.awt.*;
-import java.net.URL;
+import java.io.File;
 import java.util.Date;
+import java.util.Optional;
 
 @Getter
 @Setter
 @ToString
 @Builder
 public class GifImage {
+    private String userId;
     private String query;
-    private URL url;
+    private Optional<File> image;
     private String name;
     private Date date;
 }
