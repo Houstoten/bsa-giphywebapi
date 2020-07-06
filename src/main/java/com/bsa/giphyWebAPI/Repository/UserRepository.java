@@ -1,5 +1,6 @@
 package com.bsa.giphyWebAPI.Repository;
 
+import com.bsa.giphyWebAPI.Exceptions.ServerTimeoutException;
 import com.bsa.giphyWebAPI.utils.GifImageMapper;
 import com.bsa.giphyWebAPI.utils.ImagePuller;
 import com.bsa.giphyWebAPI.utils.ImageSaver;
@@ -58,7 +59,7 @@ public class UserRepository {
                             .orElseThrow())
                     .orElseGet(() -> getGifFromExternal(query, userId, counter + 1));
         } else {
-            return "errors with internet connection occurred, choose of existing or try later";
+            throw new ServerTimeoutException(query);
         }
     }
 }

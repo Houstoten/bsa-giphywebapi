@@ -1,6 +1,7 @@
 package com.bsa.giphyWebAPI.utils;
 
 import com.bsa.giphyWebAPI.DTO.ImageReceiveDto;
+import com.bsa.giphyWebAPI.Exceptions.GiphyRequestFailed;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,18 +23,16 @@ public class ImagePuller {
     private ObjectMapper mapper;
 
     public Optional<ImageReceiveDto> getImageReceiveDto(final String query) {
-        ImageReceiveDto imageReceiveDto = null;
         try {
             JsonNode root = mapper
                     .readTree(new URL(url + "?api_key=" + apiKey + "&tag=" + query))
                     .path("data");
-            imageReceiveDto = new ImageReceiveDto();
+            ImageReceiveDto imageReceiveDto = new ImageReceiveDto();
             imageReceiveDto.setId(root.path("id").asText());
             imageReceiveDto.setUrl(new URL(root.path("images").path("downsized_large").path("url").asText()));
+            return Optional.of(imageReceiveDto);
         } catch (IOException e) {
-            e.printStackTrace();
-        } finally {
-            return Optional.ofNullable(imageReceiveDto);
+            throw new GiphyRequestFailed(query);
         }
     }
 }
