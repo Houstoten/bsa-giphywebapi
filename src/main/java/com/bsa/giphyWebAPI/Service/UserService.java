@@ -15,7 +15,7 @@ public class UserService {
 
     public String generateGif(Optional<Boolean> force, String query, String userId) {
         return force.isPresent()
-                ? userRepository.getGifFromExternal(query, userId)
+                ? userRepository.getGifFromExternal(query, userId, 0)
                 : userRepository.getGifFromCache(query, userId);
     }
 }
