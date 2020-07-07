@@ -49,7 +49,7 @@ public class UserRepository {
             if (file.isPresent()) {
                 imageSaver.copyImageToUserFolder(file.get(), userId);
             }
-            return file.map(path -> path.normalize().toString())
+            return file.map(path -> path.normalize().toString()).map(baseRepository::addServerAddress)
                     .orElseGet(() -> getGifFromExternal(query, userId, 0));
         } catch (IOException e) {
             return getGifFromExternal(query, userId, 0);
@@ -69,6 +69,7 @@ public class UserRepository {
                     })
                     .map(gifImage -> gifImage.getImage()
                             .map(File::getPath)
+                            .map(baseRepository::addServerAddress)
                             .orElseThrow())
                     .orElseGet(() -> getGifFromExternal(query, userId, counter + 1));
         } else {
@@ -79,7 +80,8 @@ public class UserRepository {
     public String searchGifInUserFolder(String query, String userId) {
         try (Stream<Path> paths = Files.walk(Paths.get(baseRepository.getUsersDirectory() + "/" + userId + "/" + query))) {
             Optional<Path> file = paths.filter(Files::isRegularFile).findAny();
-            return file.map(path -> path.normalize().toString()).orElseThrow(() -> new SearchNotFoundException(query));
+            return file.map(path -> path.normalize().toString()).map(baseRepository::addServerAddress)
+                    .orElseThrow(() -> new SearchNotFoundException(query));
         } catch (IOException ex) {
             throw new SearchNotFoundException(query);
         }
@@ -87,7 +89,8 @@ public class UserRepository {
 
     public String searchGifInInnerCache(String query, String userId) {
         Optional<String> path = innerCacheRepository.searchPath(userId, query);
-        return path.orElseGet(() -> searchGifInUserFolder(query, userId));
+        return path.map(baseRepository::addServerAddress)
+                .orElseGet(() -> searchGifInUserFolder(query, userId));
     }
 
     public ResponseEntity<List<Map<String, String>>> getUserHistory(String userId) {
@@ -108,7 +111,9 @@ public class UserRepository {
                 map.put("gifs", Files
                         .walk(Paths.get(baseRepository.getUsersDirectory() + "/" + userId + "/" + map.get("query")))
                         .filter(Files::isRegularFile)
-                        .map(Path::toAbsolutePath)
+                        .map(Path::normalize)
+                        .map(Path::toString)
+                        .map(baseRepository::addServerAddress)
                         .collect(Collectors.toList()));
             }
             return ResponseEntity.status(HttpStatus.OK).body(list);

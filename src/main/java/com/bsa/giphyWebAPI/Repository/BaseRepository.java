@@ -1,14 +1,16 @@
 package com.bsa.giphyWebAPI.Repository;
 
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 
+@AllArgsConstructor
 @Getter
 public class BaseRepository {
     private String cacheDirectory;
     private String usersDirectory;
+    private String server;
 
-    public BaseRepository(String cacheDirectory, String usersDirectory) {
-        this.cacheDirectory = cacheDirectory;
-        this.usersDirectory = usersDirectory;
+    public String addServerAddress(String path) {
+        return server + path;
     }
 }

@@ -22,8 +22,9 @@ public class GifRepository {
         try (Stream<Path> paths = Files.walk(Paths.get(baseRepository.getCacheDirectory()))) {
             List<String> output = paths
                     .filter(Files::isRegularFile)
-                    .map(Path::toAbsolutePath)
+                    .map(Path::normalize)
                     .map(Path::toString)
+                    .map(baseRepository::addServerAddress)
                     .collect(Collectors.toList());
             return output;
         } catch (IOException e) {
