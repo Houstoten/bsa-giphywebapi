@@ -8,6 +8,7 @@ import org.springframework.stereotype.Component;
 
 import java.io.IOException;
 import java.util.Date;
+import java.util.Optional;
 
 @Component
 public class GifImageMapper {
@@ -15,7 +16,7 @@ public class GifImageMapper {
     @Autowired
     private ImageSaver imageSaver;
 
-    public GifImage getGifImageFromImageReceiveDto(ImageReceiveDto imageReceiveDto, String query, String userId)
+    public GifImage getGifImageFromImageReceiveDto(ImageReceiveDto imageReceiveDto, String query, Optional<String> userId)
             throws IOException, UnirestException {
         return GifImage.builder()
                 .userId(userId)

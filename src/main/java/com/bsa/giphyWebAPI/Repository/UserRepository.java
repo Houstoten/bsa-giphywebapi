@@ -61,7 +61,8 @@ public class UserRepository {
             return imagePuller.getImageReceiveDto(query)
                     .map(imageReceiveDto -> {
                         try {
-                            return imageMapper.getGifImageFromImageReceiveDto(imageReceiveDto, query, userId);
+                            return imageMapper
+                                    .getGifImageFromImageReceiveDto(imageReceiveDto, query, Optional.of(userId));
                         } catch (IOException | UnirestException e) {
                             return null;
                         }
@@ -101,12 +102,11 @@ public class UserRepository {
                 .orElseThrow(() -> new InvalidUserException(userId)).stream().map(File::getName)) {
 
             List<Map<String, Object>> list = new ArrayList<>();
-            paths.forEach(path -> list.add(
-                    new HashMap<>(Map.of("query", path))));
+            paths.forEach(path -> list.add(new HashMap<>(Map.of("query", path))));
 
             for (Map<String, Object> map : list) {
                 map.put("gifs", Files
-                        .walk(Paths.get(baseRepository.getUsersDirectory() + "/" + map.get("query")))
+                        .walk(Paths.get(baseRepository.getUsersDirectory() + "/" + userId + "/" + map.get("query")))
                         .filter(Files::isRegularFile)
                         .map(Path::toAbsolutePath)
                         .collect(Collectors.toList()));
@@ -130,13 +130,13 @@ public class UserRepository {
         innerCacheRepository.deletePath(userId, Optional.of(query), Optional.empty());
     }
 
-    public void resetUserCache(String userId){
+    public void resetUserCache(String userId) {
         innerCacheRepository.deletePath(userId, Optional.empty(), Optional.empty());
     }
 
     public void cleanUser(String userId) {
         try {
-            FileUtils.deleteDirectory(new File(baseRepository.getUsersDirectory()+"/"+userId));
+            FileUtils.deleteDirectory(new File(baseRepository.getUsersDirectory() + "/" + userId));
             innerCacheRepository.deletePath(userId, Optional.empty(), Optional.empty());
         } catch (IOException e) {
             throw new InvalidException("Something went wrong while deleting " + userId + " data");

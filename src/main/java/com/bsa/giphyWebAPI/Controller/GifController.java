@@ -19,7 +19,7 @@ public class GifController {
 
     @GetMapping
     @ResponseStatus(HttpStatus.OK)
-    public List<String> getAllGifsUngrouped(){
+    public List<String> getAllGifUngrouped(){
         return gifService.getAllGifsUngrouped();
     }
 

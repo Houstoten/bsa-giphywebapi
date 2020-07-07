@@ -14,13 +14,13 @@ import java.util.Map;
 @ControllerAdvice
 public class CustomGlobalExceptionHandler extends ResponseEntityExceptionHandler {
 
-    @ExceptionHandler({GiphyRequestFailed.class, SearchNotFoundException.class})
+    @ExceptionHandler({GiphyRequestFailed.class, SearchNotFoundException.class, NotFoundException.class})
     public ResponseEntity<Object> handleGiphyRequestException(NotFoundException ex) {
         return ResponseEntity.status(HttpStatus.NOT_FOUND)
                 .body(Map.of("error", ex.getMessage() != null ? ex.getMessage() : "Not found element"));
     }
 
-    @ExceptionHandler({InvalidRequestException.class, InvalidUserException.class})
+    @ExceptionHandler({InvalidRequestException.class, InvalidUserException.class, InvalidException.class})
     public ResponseEntity<Object> springHandleNotFound(InvalidException ex) throws IOException {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                 .body(Map.of("error", ex.getMessage() != null ? ex.getMessage() : "Invalid element"));

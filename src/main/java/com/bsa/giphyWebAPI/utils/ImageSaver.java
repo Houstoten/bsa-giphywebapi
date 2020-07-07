@@ -28,7 +28,7 @@ public class ImageSaver {
     @Autowired
     private BaseRepository baseRepository;
 
-    public Optional<File> saveImage(ImageReceiveDto imageReceiveDto, String query, String userId)
+    public Optional<File> saveImage(ImageReceiveDto imageReceiveDto, String query, Optional<String> userId)
             throws IOException, UnirestException {
         File file = new File(baseRepository.getCacheDirectory() + "/" + query + "/" + imageReceiveDto.getId() + ".gif");
         if (file.exists()) {
@@ -40,7 +40,9 @@ public class ImageSaver {
                         .asBinary()
                         .getBody()
                 , file);
-        copyImageToUserFolder(file, userId, query);
+        if (userId.isPresent()) {
+            copyImageToUserFolder(file, userId.get(), query);
+        }
         return Optional.of(file);
     }
 

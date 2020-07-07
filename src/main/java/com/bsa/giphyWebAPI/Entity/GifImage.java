@@ -11,7 +11,7 @@ import java.util.Optional;
 @ToString
 @Builder
 public class GifImage {
-    private String userId;
+    private Optional<String> userId;
     private String query;
     private Optional<File> image;
     private String name;
