@@ -46,6 +46,7 @@ public class CacheRepository {
                     .walk(Paths.get(baseRepository.getCacheDirectory() + "/" + query))
                     .filter(Files::isRegularFile)
                     .map(Path::toAbsolutePath)
+                    .map(Path::normalize)
                     .collect(Collectors.toList()));
 
             return ResponseEntity.status(HttpStatus.OK).body(list);
@@ -70,6 +71,7 @@ public class CacheRepository {
                         .walk(Paths.get(baseRepository.getCacheDirectory() + "/" + map.get("query")))
                         .filter(Files::isRegularFile)
                         .map(Path::toAbsolutePath)
+                        .map(Path::normalize)
                         .collect(Collectors.toList()));
             }
             return ResponseEntity.status(HttpStatus.OK).body(list);
@@ -91,7 +93,7 @@ public class CacheRepository {
                         }
                     })
                     .map(gifImage -> gifImage.getImage()
-                            .map(File::getPath)
+                            .map(File::getAbsolutePath)
                             .orElseThrow())
                     .orElseGet(() -> generateCache(query, counter + 1));
         } else {

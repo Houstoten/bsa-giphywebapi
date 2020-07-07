@@ -23,6 +23,7 @@ public class GifRepository {
             List<String> output = paths
                     .filter(Files::isRegularFile)
                     .map(Path::toAbsolutePath)
+                    .map(Path::normalize)
                     .map(Path::toString)
                     .collect(Collectors.toList());
             return output;

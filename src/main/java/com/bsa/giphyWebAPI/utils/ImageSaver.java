@@ -41,7 +41,7 @@ public class ImageSaver {
                         .getBody()
                 , file);
         if (userId.isPresent()) {
-            copyImageToUserFolder(file, userId.get(), query);
+           return copyImageToUserFolder(file, userId.get(), query);
         }
         return Optional.of(file);
     }
@@ -52,9 +52,8 @@ public class ImageSaver {
             return Optional.empty();
         }
         FileUtils.copyFile(image, newFile);
-        innerCacheRepository.addPath(userId, query, newFile.getName(), newFile.getPath());
-        System.out.println(innerCacheRepository.innerCacheData.toString());
-        csvReaderWriter.writeCsv(LocalDate.now(), userId, query, newFile.getPath());
+        innerCacheRepository.addPath(userId, query, newFile.getName(), newFile.getAbsolutePath());
+        csvReaderWriter.writeCsv(LocalDate.now(), userId, query, newFile.getAbsolutePath());
         return Optional.of(newFile);
     }
 
@@ -69,12 +68,11 @@ public class ImageSaver {
         FileUtils.copyFile(oldFile, newFile);
         innerCacheRepository.addPath(userId
                 , path.subpath(path.getNameCount() - 2, path.getNameCount() - 1).toString()
-                , newFile.getName(), newFile.getPath());
-        System.out.println(innerCacheRepository.innerCacheData.toString());
+                , newFile.getName(), newFile.getAbsolutePath());
         csvReaderWriter.writeCsv(LocalDate.now()
                 , userId
                 , path.subpath(path.getNameCount() - 2, path.getNameCount() - 1).toString()
-                , newFile.getPath());
+                , newFile.getAbsolutePath());
         return Optional.of(newFile);
     }
 }

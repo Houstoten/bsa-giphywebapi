@@ -49,7 +49,7 @@ public class UserRepository {
             if (file.isPresent()) {
                 imageSaver.copyImageToUserFolder(file.get(), userId);
             }
-            return file.map(path -> path.normalize().toString())
+            return file.map(path -> path.toAbsolutePath().normalize().toString())
                     .orElseGet(() -> getGifFromExternal(query, userId, 0));
         } catch (IOException e) {
             return getGifFromExternal(query, userId, 0);
@@ -68,7 +68,7 @@ public class UserRepository {
                         }
                     })
                     .map(gifImage -> gifImage.getImage()
-                            .map(File::getPath)
+                            .map(File::getAbsolutePath)
                             .orElseThrow())
                     .orElseGet(() -> getGifFromExternal(query, userId, counter + 1));
         } else {
@@ -79,7 +79,7 @@ public class UserRepository {
     public String searchGifInUserFolder(String query, String userId) {
         try (Stream<Path> paths = Files.walk(Paths.get(baseRepository.getUsersDirectory() + "/" + userId + "/" + query))) {
             Optional<Path> file = paths.filter(Files::isRegularFile).findAny();
-            return file.map(path -> path.normalize().toString()).orElseThrow(() -> new SearchNotFoundException(query));
+            return file.map(path -> path.toAbsolutePath().normalize().toString()).orElseThrow(() -> new SearchNotFoundException(query));
         } catch (IOException ex) {
             throw new SearchNotFoundException(query);
         }
@@ -109,6 +109,7 @@ public class UserRepository {
                         .walk(Paths.get(baseRepository.getUsersDirectory() + "/" + userId + "/" + map.get("query")))
                         .filter(Files::isRegularFile)
                         .map(Path::toAbsolutePath)
+                        .map(Path::normalize)
                         .collect(Collectors.toList()));
             }
             return ResponseEntity.status(HttpStatus.OK).body(list);
