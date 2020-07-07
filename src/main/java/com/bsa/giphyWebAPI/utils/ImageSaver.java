@@ -12,6 +12,7 @@ import org.springframework.stereotype.Component;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
+import java.time.LocalDate;
 import java.util.Date;
 import java.util.Optional;
 
@@ -51,7 +52,7 @@ public class ImageSaver {
         FileUtils.copyFile(image, newFile);
         innerCacheRepository.addPath(userId, query, newFile.getName(), newFile.getPath());
         System.out.println(innerCacheRepository.innerCacheData.toString());
-        csvReaderWriter.writeCsv(new Date(), userId, query, newFile.getPath());
+        csvReaderWriter.writeCsv(LocalDate.now(), userId, query, newFile.getPath());
         return Optional.of(newFile);
     }
 
@@ -68,7 +69,7 @@ public class ImageSaver {
                 , path.subpath(path.getNameCount() - 2, path.getNameCount() - 1).toString()
                 , newFile.getName(), newFile.getPath());
         System.out.println(innerCacheRepository.innerCacheData.toString());
-        csvReaderWriter.writeCsv(new Date()
+        csvReaderWriter.writeCsv(LocalDate.now()
                 , userId
                 , path.subpath(path.getNameCount() - 2, path.getNameCount() - 1).toString()
                 , newFile.getPath());

@@ -1,12 +1,15 @@
 package com.bsa.giphyWebAPI.Repository;
 
-import com.bsa.giphyWebAPI.Exceptions.SearchNotFoundException;
-import com.bsa.giphyWebAPI.Exceptions.ServerTimeoutException;
+import com.bsa.giphyWebAPI.Exceptions.*;
+import com.bsa.giphyWebAPI.utils.CsvReaderWriter;
 import com.bsa.giphyWebAPI.utils.GifImageMapper;
 import com.bsa.giphyWebAPI.utils.ImagePuller;
 import com.bsa.giphyWebAPI.utils.ImageSaver;
 import com.mashape.unirest.http.exceptions.UnirestException;
+import org.apache.commons.io.FileUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Repository;
 
 import java.io.File;
@@ -14,12 +17,16 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.Optional;
-import java.util.function.Predicate;
+import java.util.*;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
+
 
 @Repository
 public class UserRepository {
+
+    @Autowired
+    private CsvReaderWriter csvReaderWriter;
 
     @Autowired
     private InnerCacheRepository innerCacheRepository;
@@ -80,5 +87,60 @@ public class UserRepository {
     public String searchGifInInnerCache(String query, String userId) {
         Optional<String> path = innerCacheRepository.searchPath(userId, query);
         return path.orElseGet(() -> searchGifInUserFolder(query, userId));
+    }
+
+    public ResponseEntity<List<Map<String, String>>> getUserHistory(String userId) {
+        return ResponseEntity.status(HttpStatus.OK).body(csvReaderWriter.readCsv(userId));
+    }
+
+    public ResponseEntity<List<Map<String, Object>>> getAllUserFiles(String userId) {
+
+        try (Stream<String> paths = Optional
+                .of(new File(baseRepository.getUsersDirectory() + "/" + userId))
+                .map(file -> file.listFiles(File::isDirectory)).map(Arrays::asList)
+                .orElseThrow(() -> new InvalidUserException(userId)).stream().map(File::getName)) {
+
+            List<Map<String, Object>> list = new ArrayList<>();
+            paths.forEach(path -> list.add(
+                    new HashMap<>(Map.of("query", path))));
+
+            for (Map<String, Object> map : list) {
+                map.put("gifs", Files
+                        .walk(Paths.get(baseRepository.getUsersDirectory() + "/" + map.get("query")))
+                        .filter(Files::isRegularFile)
+                        .map(Path::toAbsolutePath)
+                        .collect(Collectors.toList()));
+            }
+            return ResponseEntity.status(HttpStatus.OK).body(list);
+
+        } catch (IOException e) {
+            throw new InvalidUserException(userId);
+        }
+    }
+
+    public void cleanUserHistory(String userId) {
+        try {
+            Files.deleteIfExists(Paths.get(baseRepository.getUsersDirectory() + "/" + userId + "/history.csv"));
+        } catch (IOException e) {
+            throw new InvalidException("Something went wrong while deleting " + userId + "/history.csv");
+        }
+    }
+
+    public void resetUserCache(String userId, String query) {
+        innerCacheRepository.deletePath(userId, Optional.of(query), Optional.empty());
+    }
+
+    public void resetUserCache(String userId){
+        innerCacheRepository.deletePath(userId, Optional.empty(), Optional.empty());
+    }
+
+    public void cleanUser(String userId) {
+        try {
+            FileUtils.deleteDirectory(new File(baseRepository.getUsersDirectory()+"/"+userId));
+            innerCacheRepository.deletePath(userId, Optional.empty(), Optional.empty());
+        } catch (IOException e) {
+            throw new InvalidException("Something went wrong while deleting " + userId + " data");
+        }
+
     }
 }

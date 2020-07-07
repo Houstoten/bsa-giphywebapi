@@ -1,5 +1,6 @@
 package com.bsa.giphyWebAPI.Repository;
 
+import com.bsa.giphyWebAPI.Exceptions.InvalidUserException;
 import org.springframework.stereotype.Component;
 
 import java.util.*;
@@ -34,17 +35,28 @@ public class InnerCacheRepository {
         }
     }
 
-    public void deletePath(String userId, String query, String fileName) {
+    public void deletePath(String userId, Optional<String> query, Optional<String> fileName) {
         if (innerCacheData.containsKey(userId)) {
-            if (innerCacheData.get(userId).containsKey(query)) {
-                innerCacheData.get(userId).get(query).remove(fileName);
-                if (innerCacheData.get(userId).get(query).isEmpty()) {
-                    innerCacheData.get(userId).remove(query);
+            if (query.isPresent()) {
+
+                if (innerCacheData.get(userId).containsKey(query.get())
+                        && fileName.isPresent()
+                        && innerCacheData.get(userId).get(query.get()).containsKey(fileName.get())) {
+
+                    innerCacheData.get(userId).get(query.get()).remove(fileName.get());
+                    innerCacheData.get(userId).get(query.get()).remove(fileName.get());
+                    if (innerCacheData.get(userId).get(query.get()).isEmpty()) {
+                        innerCacheData.get(userId).remove(query.get());
+                    }
+
+                } else {
+                    innerCacheData.get(userId).remove(query.get());
                 }
+            } else {
+                innerCacheData.remove(userId);
             }
-//            if (innerCacheData.get(userId).isEmpty()) {
-//                innerCacheData.remove(userId);
-//            }
+        }else {
+            throw new InvalidUserException(userId);
         }
     }
 }
