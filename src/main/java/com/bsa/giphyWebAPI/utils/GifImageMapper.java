@@ -21,7 +21,6 @@ public class GifImageMapper {
                 .userId(userId)
                 .image(imageSaver.saveImage(imageReceiveDto, query, userId))
                 .name(imageReceiveDto.getId())
-                .date(new Date())
                 .query(query)
                 .build();
     }

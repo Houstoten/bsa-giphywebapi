@@ -15,5 +15,4 @@ public class GifImage {
     private String query;
     private Optional<File> image;
     private String name;
-    private Date date;
 }

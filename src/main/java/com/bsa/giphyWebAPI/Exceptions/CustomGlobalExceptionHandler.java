@@ -14,8 +14,8 @@ import java.util.Map;
 @ControllerAdvice
 public class CustomGlobalExceptionHandler extends ResponseEntityExceptionHandler {
 
-    @ExceptionHandler(GiphyRequestFailed.class)
-    public ResponseEntity<Object> handleGiphyRequestException(GiphyRequestFailed ex) {
+    @ExceptionHandler({GiphyRequestFailed.class, SearchNotFoundException.class})
+    public ResponseEntity<Object> handleGiphyRequestException(NotFoundException ex) {
         return ResponseEntity.status(HttpStatus.NOT_FOUND)
                 .body(Map.of("error", ex.getMessage() != null ? ex.getMessage() : "Not found element"));
     }

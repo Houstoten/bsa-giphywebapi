@@ -1,11 +1,11 @@
 package com.bsa.giphyWebAPI.Service;
 
-import com.bsa.giphyWebAPI.Entity.FolderEntity;
+import com.bsa.giphyWebAPI.Entity.QueryFolderEntity;
 import org.springframework.stereotype.Service;
 
 @Service
 public class CacheService {
-    public FolderEntity getAllCache(String query){
+    public QueryFolderEntity getAllCache(String query){
         return null;
     }
 }

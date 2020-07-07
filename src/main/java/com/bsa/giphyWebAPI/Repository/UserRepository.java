@@ -1,5 +1,6 @@
 package com.bsa.giphyWebAPI.Repository;
 
+import com.bsa.giphyWebAPI.Exceptions.SearchNotFoundException;
 import com.bsa.giphyWebAPI.Exceptions.ServerTimeoutException;
 import com.bsa.giphyWebAPI.utils.GifImageMapper;
 import com.bsa.giphyWebAPI.utils.ImagePuller;
@@ -14,10 +15,14 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Optional;
+import java.util.function.Predicate;
 import java.util.stream.Stream;
 
 @Repository
 public class UserRepository {
+
+    @Autowired
+    private InnerCacheRepository innerCacheRepository;
 
     @Autowired
     private ImageSaver imageSaver;
@@ -61,5 +66,19 @@ public class UserRepository {
         } else {
             throw new ServerTimeoutException(query);
         }
+    }
+
+    public String searchGifInUserFolder(String query, String userId) {
+        try (Stream<Path> paths = Files.walk(Paths.get(baseRepository.getUsersDirectory() + "/" + userId + "/" + query))) {
+            Optional<Path> file = paths.filter(Files::isRegularFile).findAny();
+            return file.map(path -> path.normalize().toString()).orElseThrow(() -> new SearchNotFoundException(query));
+        } catch (IOException ex) {
+            throw new SearchNotFoundException(query);
+        }
+    }
+
+    public String searchGifInInnerCache(String query, String userId) {
+        Optional<String> path = innerCacheRepository.searchPath(userId, query);
+        return path.orElseGet(() -> searchGifInUserFolder(query, userId));
     }
 }

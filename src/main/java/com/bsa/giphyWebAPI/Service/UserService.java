@@ -22,4 +22,14 @@ public class UserService {
             throw new InvalidRequestException(query);
         }
     }
+
+    public String searchGif(Optional<Boolean> force, String query, String userId) {
+        if (query.trim().length() != 0) {
+            return force.isPresent()
+                    ? userRepository.searchGifInUserFolder(query, userId)
+                    : userRepository.searchGifInInnerCache(query, userId);
+        } else {
+            throw new InvalidRequestException(query);
+        }
+    }
 }

@@ -2,6 +2,7 @@ package com.bsa.giphyWebAPI.utils;
 
 import com.bsa.giphyWebAPI.DTO.ImageReceiveDto;
 import com.bsa.giphyWebAPI.Repository.BaseRepository;
+import com.bsa.giphyWebAPI.Repository.InnerCacheRepository;
 import com.mashape.unirest.http.Unirest;
 import com.mashape.unirest.http.exceptions.UnirestException;
 import org.apache.commons.io.FileUtils;
@@ -11,10 +12,17 @@ import org.springframework.stereotype.Component;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
+import java.util.Date;
 import java.util.Optional;
 
 @Component
 public class ImageSaver {
+
+    @Autowired
+    private CsvReaderWriter csvReaderWriter;
+
+    @Autowired
+    private InnerCacheRepository innerCacheRepository;
 
     @Autowired
     private BaseRepository baseRepository;
@@ -41,6 +49,9 @@ public class ImageSaver {
             return Optional.empty();
         }
         FileUtils.copyFile(image, newFile);
+        innerCacheRepository.addPath(userId, query, newFile.getName(), newFile.getPath());
+        System.out.println(innerCacheRepository.innerCacheData.toString());
+        csvReaderWriter.writeCsv(new Date(), userId, query, newFile.getPath());
         return Optional.of(newFile);
     }
 
@@ -53,6 +64,14 @@ public class ImageSaver {
             return Optional.empty();
         }
         FileUtils.copyFile(oldFile, newFile);
+        innerCacheRepository.addPath(userId
+                , path.subpath(path.getNameCount() - 2, path.getNameCount() - 1).toString()
+                , newFile.getName(), newFile.getPath());
+        System.out.println(innerCacheRepository.innerCacheData.toString());
+        csvReaderWriter.writeCsv(new Date()
+                , userId
+                , path.subpath(path.getNameCount() - 2, path.getNameCount() - 1).toString()
+                , newFile.getPath());
         return Optional.of(newFile);
     }
 }
