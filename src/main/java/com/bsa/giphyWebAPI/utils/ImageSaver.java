@@ -52,8 +52,8 @@ public class ImageSaver {
             return Optional.empty();
         }
         FileUtils.copyFile(image, newFile);
-        innerCacheRepository.addPath(userId, query, newFile.getName(), newFile.getAbsolutePath());
-        csvReaderWriter.writeCsv(LocalDate.now(), userId, query, newFile.getAbsolutePath());
+        innerCacheRepository.addPath(userId, query, newFile.getName(), baseRepository.addServerAddress(newFile.getPath()));
+        csvReaderWriter.writeCsv(LocalDate.now(), userId, query, baseRepository.addServerAddress(newFile.getPath()));
         return Optional.of(newFile);
     }
 
@@ -68,11 +68,11 @@ public class ImageSaver {
         FileUtils.copyFile(oldFile, newFile);
         innerCacheRepository.addPath(userId
                 , path.subpath(path.getNameCount() - 2, path.getNameCount() - 1).toString()
-                , newFile.getName(), newFile.getAbsolutePath());
+                , newFile.getName(), baseRepository.addServerAddress(newFile.getPath()));
         csvReaderWriter.writeCsv(LocalDate.now()
                 , userId
                 , path.subpath(path.getNameCount() - 2, path.getNameCount() - 1).toString()
-                , newFile.getAbsolutePath());
+                , baseRepository.addServerAddress(newFile.getPath()));
         return Optional.of(newFile);
     }
 }
