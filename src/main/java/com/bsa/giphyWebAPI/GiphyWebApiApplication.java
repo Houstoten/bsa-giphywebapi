@@ -15,7 +15,7 @@ import java.io.IOException;
 @SpringBootApplication
 @PropertySources({
         @PropertySource("classpath:application.properties"),
-        @PropertySource("classpath:dev.properties")
+        @PropertySource("classpath:prod.properties")
 })
 public class GiphyWebApiApplication {
 
